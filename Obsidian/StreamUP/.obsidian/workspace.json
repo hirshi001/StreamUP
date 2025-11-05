@@ -1,0 +1,211 @@
+{
+  "main": {
+    "id": "1cdef382d8b41d3a",
+    "type": "split",
+    "children": [
+      {
+        "id": "31f32ce45fece9cb",
+        "type": "tabs",
+        "dimension": 91.36442141623489,
+        "children": [
+          {
+            "id": "89ce22c8c6231828",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Channel Parameters.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Channel Parameters"
+            }
+          },
+          {
+            "id": "55c7d8fcebd4ecf6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Channel Parameters.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Channel Parameters"
+            }
+          }
+        ],
+        "currentTab": 1
+      },
+      {
+        "id": "47dad0023779c0d3",
+        "type": "tabs",
+        "dimension": 8.635578583765112,
+        "children": [
+          {
+            "id": "d990d349b5fe09ff",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "5956be37835f9bd6",
+    "type": "split",
+    "children": [
+      {
+        "id": "bdc0b11c0a922d85",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "125558846960a41e",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "5a32f1630e982555",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "0835e0e8f12e7a8d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "79a71d3f92b9ab2c",
+    "type": "split",
+    "children": [
+      {
+        "id": "4f1a33198178b5ae",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "32663c67bf4485f8",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Weighted Priority with Starvability Option.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Weighted Priority with Starvability Option"
+            }
+          },
+          {
+            "id": "aab265b7bfb3e26e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Weighted Priority with Starvability Option.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Weighted Priority with Starvability Option"
+            }
+          },
+          {
+            "id": "6bd7d9172dcd3d3a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "1f137f31d01b24ca",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Weighted Priority with Starvability Option.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Weighted Priority with Starvability Option"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "obsidian-excalidraw-plugin:New drawing": false
+    }
+  },
+  "active": "55c7d8fcebd4ecf6",
+  "lastOpenFiles": [
+    "Weighted Priority with Starvability Option.md",
+    "Channel Parameters.md",
+    "Welcome.md"
+  ]
+}

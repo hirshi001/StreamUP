@@ -1,0 +1,4 @@
+add_executable(StreamUPInterfaceTest CreateStreamTest.cpp)
+target_link_libraries(StreamUPInterfaceTest PRIVATE Boost::unit_test_framework StreamUP)
+
+add_test(NAME StreamUPInterfaceBoostTests COMMAND StreamUPInterfaceTests)
