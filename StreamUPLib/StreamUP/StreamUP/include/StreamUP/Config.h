@@ -1,15 +1,25 @@
 #pragma once
+#include <climits>
+#include <cstdint>
 
 namespace SUP
 {
-
 struct StreamUPConfig
 {
-    size_t bitsForId = sizeof(uint8_t) * CHAR_BIT;
-    size_t maxIncomingConnections;
-    size_t maxOutgoingConnections;
-    size_t maxStreamsPerConnection;
-    size_t maxMessageSize;
+    StreamUPConfig(uint64_t maxIncomingConnections, uint64_t maxOutgoingConnections,
+                   uint64_t maxStreamsPerConnection, uint64_t maxMessageSize)
+        : maxIncomingConnections(maxIncomingConnections),
+          maxOutgoingConnections(maxOutgoingConnections),
+          maxStreamsPerConnection(maxStreamsPerConnection),
+          maxMessageSize(maxMessageSize)
+    {
+    }
+
+    uint64_t bitsForId = sizeof(uint8_t) * CHAR_BIT;
+    uint64_t maxIncomingConnections;
+    uint64_t maxOutgoingConnections;
+    uint64_t maxStreamsPerConnection;
+    uint64_t maxMessageSize;
 };
 
 enum Reliability
@@ -24,15 +34,25 @@ enum Reliability
 
 struct ConnectionConfig
 {
-    size_t maxStreams;
-    size_t maxMessageSize;
+    ConnectionConfig(uint64_t maxStreams,
+                     uint64_t maxMessageSize) : maxStreams(maxStreams),
+                                                maxMessageSize(maxMessageSize)
+    {
+    }
+
+    uint64_t maxStreams;
+    uint64_t maxMessageSize;
 };
 
 
 struct StreamConfig
 {
-    Reliability reliability;
-    size_t bufferSize = 0;
-};
+    StreamConfig(Reliability reliability, uint64_t bufferSize) : reliability(reliability),
+                                                                 bufferSize(bufferSize)
+    {
+    }
 
+    Reliability reliability;
+    uint64_t bufferSize;
+};
 }

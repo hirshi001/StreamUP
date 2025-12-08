@@ -1,36 +1,80 @@
 #pragma once
 
 #include "StreamUP/Config.h"
-#include "Connection.h"
+#include "StreamUP/Connection/Connection.h"
+#include "StreamUP/ConnectionManager/ConnectionManager.h"
 
-#include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace SUP
 {
+enum class InitializationResult
+{
+    SUCCESS = 0,
+    FAILED_TO_CREATE_SOCKET = 1,
+};
 
 class StreamUP
 {
 
+private:
+    explicit StreamUP(const StreamUPConfig &config) : config(config)
+    {
+    }
+
+
+    InitializationResult initializeStreamUP()
+    {
+        connectionManager = std::make_unique<ConnectionManager>(
+            config.maxIncomingConnections + config.maxOutgoingConnections);
+        localSocket = ;
+        if (localSocket == -1)
+        {
+            return InitializationResult::FAILED_TO_CREATE_SOCKET;
+        }
+
+        return InitializationResult::SUCCESS;
+    }
+
+
 public:
-    using Id = uint64_t;
+    static std::pair<std::optional<StreamUP>, InitializationResult> create(const StreamUPConfig &config)
+    {
+        StreamUP instance(config);
 
-    explicit StreamUP(const StreamUPConfig &config);
+        InitializationResult result = instance.initializeStreamUP();
+        if (result != InitializationResult::SUCCESS)
+            return std::make_pair(std::nullopt, result);
 
-    ~StreamUP();
+        return std::make_pair(std::make_optional(std::move(instance)), result);
+    };
 
-    // Add methods and members as needed for the SUP functionality
-    std::unique_ptr<Connection> createConnection(consts ConnectionConfig& config);
+    StreamUP(const StreamUP &) = delete;
 
-    std::unique_ptr<Connection> createStream(Id id, const StreamConfig& config);
+    StreamUP &operator=(const StreamUP &) = delete;
 
-    void createStream(const Id id, const StreamConfig& config);
+
+    StreamUP(StreamUP &&) noexcept = default;
+
+    StreamUP &operator=(StreamUP &&) noexcept = default;
+
+    ~StreamUP() = default;
+
+    [[nodiscard]] int bind(const Address& address)
+    {
+        return localSocket->bind(address);
+    }
+
+    std::pair<std::unique_ptr<Connection>, CreateConnectionResult> createConnection(
+        const ConnectionConfig &connectionConfig)
+    {
+        return connectionManager->createConnection(connectionConfig);
+    }
 
 private:
-    class StreamUPImpl;
-    std::unique_ptr<StreamUPImpl> impl;
-
     StreamUPConfig config;
+    std::unique_ptr<ConnectionManager> connectionManager;
+    std::unique_ptr<Socket> localSocket;
 };
-
 }

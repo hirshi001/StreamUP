@@ -4,6 +4,8 @@ project(StreamUP)
 enable_testing()
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
+include(FetchContent)
+
 set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(StreamUP)

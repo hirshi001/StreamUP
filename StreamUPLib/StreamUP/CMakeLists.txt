@@ -1,3 +1,4 @@
-add_subdirectory(data)
+add_subdirectory(ThirdParty)
+add_subdirectory(Platform)
 add_subdirectory(protocol)
 add_subdirectory(StreamUP)
