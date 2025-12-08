@@ -1,5 +1,5 @@
 add_library(StreamUPData STATIC
-        include/buffer/ArrayBuffer.h)
+        include/Data/buffer/ArrayBuffer.h)
 
 target_sources(StreamUPData PRIVATE
         src/Placeholder.cpp
