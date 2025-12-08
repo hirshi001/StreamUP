@@ -1,5 +1,4 @@
-add_executable(StreamUPProtoclTCPTests TCPTest.cpp
-        BufferTest.cpp)
-target_link_libraries(StreamUPProtoclTCPTests PRIVATE Boost::unit_test_framework StreamUPProtocol)
+add_executable(StreamUPProtocolTests TCPTest.cpp)
+target_link_libraries(StreamUPProtocolTests PRIVATE Boost::unit_test_framework StreamUPProtocol)
 
-add_test(NAME StreamUPProtoclTCPBoostTests COMMAND StreamUPProtoclTCPTests)
+add_test(NAME StreamUPProtocolTestsBoostTests COMMAND StreamUPProtocolTests)

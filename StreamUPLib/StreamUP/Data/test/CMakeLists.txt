@@ -1,0 +1,4 @@
+add_executable(StreamUPDataTests BufferTest.cpp)
+target_link_libraries(StreamUPDataTests PRIVATE Boost::unit_test_framework StreamUPData)
+
+add_test(NAME StreamUPDataBoostTests COMMAND StreamUPDataTests)

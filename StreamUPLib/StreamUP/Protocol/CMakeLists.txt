@@ -5,11 +5,10 @@ add_library(StreamUPProtocol STATIC
         include/Protocol/rtt/DefaultRTTEstimator.h
         src/rtt/DefaultRTTEstimator.cpp
         test/TCPTest.cpp
-        include/Protocol/AuthEncryptionTypes.h
-        include/Protocol/buffer/ArrayBuffer.h)
+        include/Protocol/AuthEncryptionTypes.h)
 
 target_sources(StreamUPProtocol PRIVATE
-        Protocol.cpp
+        src/Protocol.cpp
 )
 
 

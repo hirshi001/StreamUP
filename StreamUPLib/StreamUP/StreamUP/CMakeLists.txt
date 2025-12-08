@@ -1,4 +1,5 @@
-add_library(StreamUP STATIC)
+add_library(StreamUP STATIC
+        ../Data/src/Placeholder.cpp)
 
 target_include_directories(StreamUP PUBLIC include)
 include(Sources.cmake)
