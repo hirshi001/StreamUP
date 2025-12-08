@@ -121,3 +121,46 @@ BOOST_AUTO_TEST_CASE(BufferUpdateTest)
     BOOST_REQUIRE_EQUAL(readIntUpdate<uint8_t>(rptr), e);
 }
 
+
+BOOST_AUTO_TEST_CASE(BufferAllTypesTest)
+{
+    std::vector<uint8_t> array;
+    array.resize(1024);
+
+    uint8_t a = 123;
+    uint16_t b = 4567;
+    uint32_t c = 123456789;
+    uint64_t d = 123456789123456789;
+    int8_t e = -123;
+    int16_t f = 4567;
+    int32_t g = -123456789;
+    int64_t h = 123456789123456789;
+    float i = 127.43F;
+    double j = 1356245138426594.12452364;
+
+
+
+    uint8_t *data = array.data();
+    writeUpdate(data, a);
+    writeUpdate(data, b);
+    writeUpdate(data, c);
+    writeUpdate(data, d);
+    writeUpdate(data, e);
+    writeUpdate(data, f);
+    writeUpdate(data, g);
+    writeUpdate(data, h);
+    writeUpdate(data, i);
+    writeUpdate(data, j);
+
+    const uint8_t* rptr = array.data();
+    BOOST_REQUIRE_EQUAL(readUpdate<uint8_t>(rptr), a);
+    BOOST_REQUIRE_EQUAL(readUpdate<uint16_t>(rptr), b);
+    BOOST_REQUIRE_EQUAL(readUpdate<uint32_t>(rptr), c);
+    BOOST_REQUIRE_EQUAL(readUpdate<uint64_t>(rptr), d);
+    BOOST_REQUIRE_EQUAL(readUpdate<int8_t>(rptr), e);
+    BOOST_REQUIRE_EQUAL(readUpdate<int16_t>(rptr), f);
+    BOOST_REQUIRE_EQUAL(readUpdate<int32_t>(rptr), g);
+    BOOST_REQUIRE_EQUAL(readUpdate<int64_t>(rptr), h);
+    BOOST_REQUIRE_EQUAL(readUpdate<float>(rptr), i);
+    BOOST_REQUIRE_EQUAL(readUpdate<double>(rptr), j);
+}
