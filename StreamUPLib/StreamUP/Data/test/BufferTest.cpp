@@ -4,7 +4,7 @@
 #include <random>
 #include <boost/test/included/unit_test.hpp> // header-only version
 
-#include "Data/buffer/ArrayBuffer.h"
+#include "Data/buffer/BufferUtil.h"
 
 
 using namespace SUP;

@@ -4,7 +4,7 @@
 namespace SUP::BufferUtil
 {
 template<typename T>
-size_t writeInt(uint8_t *data, T value)
+constexpr size_t writeInt(uint8_t *data, T value)
     requires std::is_integral_v<T>
 {
     constexpr size_t N = sizeof(T);
@@ -16,7 +16,7 @@ size_t writeInt(uint8_t *data, T value)
 }
 
 template<typename T>
-size_t readInt(const uint8_t *data, T &value)
+constexpr size_t readInt(const uint8_t *data, T &value)
     requires std::is_integral_v<T>
 {
     value = 0;
@@ -30,52 +30,42 @@ size_t readInt(const uint8_t *data, T &value)
 }
 
 template<typename T>
-size_t writeFloat(uint8_t *data, T value)
+constexpr size_t writeFloat(uint8_t *data, const T& value)
     requires std::is_floating_point_v<T>
 {
     // Copy bytes, then ensure big-endian
     constexpr size_t N = sizeof(T);
 
-    uint8_t tmp[N];
-    std::memcpy(tmp, &value, N);
+    auto bytes = std::bit_cast<std::array<uint8_t, N>>(value);
 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    // Reverse bytes for network byte order
+    if constexpr (std::endian::native == std::endian::little)
+        std::reverse(bytes.begin(), bytes.end());
+
     for (size_t i = 0; i < N; ++i)
-    {
-        data[i] = tmp[N - 1 - i];
-    }
-#else
-    std::memcpy(data, tmp, N);
-#endif
+        data[i] = bytes[i];
     return N;
 }
 
 
 template<typename T>
-size_t readFloat(const uint8_t *data, T &value)
+constexpr size_t readFloat(const uint8_t *data, T &value)
     requires std::is_floating_point_v<T>
 {
     constexpr size_t N = sizeof(T);
-    uint8_t tmp[N];
+    std::array<uint8_t, N> bytes;
 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    // Reverse from network byte order to native
     for (size_t i = 0; i < N; ++i)
-    {
-        tmp[i] = data[N - 1 - i];
-    }
-#else
-    std::memcpy(tmp, data, N);
-#endif
+        bytes[i] = data[i];
 
-    value = 0;
-    std::memcpy(&value, tmp, N);
+    if constexpr (std::endian::native == std::endian::little)
+        std::reverse(bytes.begin(), bytes.end());
+
+    value = std::bit_cast<T>(bytes);
     return N;
 }
 
 template<typename T>
-size_t write(uint8_t *data, T value)
+constexpr size_t write(uint8_t *data, T value)
     requires std::is_arithmetic_v<T>
 {
     if constexpr (std::is_integral_v<T>)
@@ -89,7 +79,7 @@ size_t write(uint8_t *data, T value)
 
 
 template<typename T>
-size_t read(const uint8_t *data, T& value)
+constexpr size_t read(const uint8_t *data, T& value)
     requires std::is_arithmetic_v<T>
 {
     if constexpr (std::is_integral_v<T>)
