@@ -14,7 +14,7 @@ target_sources(StreamUPProtocol PRIVATE
 
 find_package(OpenSSL REQUIRED)
 
-target_link_libraries(StreamUPProtocol PRIVATE OpenSSL:SSL OpenSSL::Crypto)
+target_link_libraries(StreamUPProtocol PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 target_include_directories(StreamUPProtocol PUBLIC include)
 

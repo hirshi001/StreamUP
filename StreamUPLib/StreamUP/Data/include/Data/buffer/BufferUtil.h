@@ -1,4 +1,7 @@
 #pragma once
+#include <array>
+#include <bit>
+#include <type_traits>
 
 
 namespace SUP::BufferUtil
@@ -30,13 +33,13 @@ constexpr size_t readInt(const uint8_t *data, T &value)
 }
 
 template<typename T>
-constexpr size_t writeFloat(uint8_t *data, const T& value)
+constexpr size_t writeFloat(uint8_t *data, const T &value)
     requires std::is_floating_point_v<T>
 {
     // Copy bytes, then ensure big-endian
     constexpr size_t N = sizeof(T);
 
-    auto bytes = std::bit_cast<std::array<uint8_t, N>>(value);
+    auto bytes = std::bit_cast<std::array<uint8_t, N> >(value);
 
     if constexpr (std::endian::native == std::endian::little)
         std::reverse(bytes.begin(), bytes.end());
@@ -75,11 +78,12 @@ constexpr size_t write(uint8_t *data, T value)
     {
         return writeFloat<T>(data, value);
     }
+    __builtin_unreachable();
 }
 
 
 template<typename T>
-constexpr size_t read(const uint8_t *data, T& value)
+constexpr size_t read(const uint8_t *data, T &value)
     requires std::is_arithmetic_v<T>
 {
     if constexpr (std::is_integral_v<T>)
@@ -89,5 +93,6 @@ constexpr size_t read(const uint8_t *data, T& value)
     {
         return readFloat<T>(data, value);
     }
+    __builtin_unreachable();
 }
 }

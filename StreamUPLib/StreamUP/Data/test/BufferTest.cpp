@@ -12,8 +12,7 @@ using namespace SUP::BufferUtil;
 
 BOOST_AUTO_TEST_CASE(BufferTest)
 {
-    std::vector<uint8_t> array;
-    array.resize(1024);
+    std::array<uint8_t, 1024> array{};
 
     uint8_t wA1 = 123, rA1;
     uint16_t wB1 = 4567, rB1;
@@ -76,4 +75,5 @@ BOOST_AUTO_TEST_CASE(BufferTest)
     BOOST_REQUIRE_EQUAL(wA3, rA3);
     data += read<double>(data, rB3);
     BOOST_REQUIRE_EQUAL(wB3, rB3);
+
 }
