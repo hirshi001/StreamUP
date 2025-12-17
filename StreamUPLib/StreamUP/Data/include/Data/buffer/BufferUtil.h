@@ -95,4 +95,5 @@ constexpr size_t read(const uint8_t *data, T &value)
     }
     __builtin_unreachable();
 }
+
 }

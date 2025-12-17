@@ -69,6 +69,7 @@ https://datatracker.ietf.org/doc/html/draft-ietf-tls-tls13-28#page-131
 
 ## Public key Types and Values
 ### Ephemeral Keys
+Max length of ephemeral key is 1024 bits.
 
 | Key Type   | Value |
 | ---------- | ----- |

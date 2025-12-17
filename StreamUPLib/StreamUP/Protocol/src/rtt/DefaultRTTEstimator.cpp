@@ -1,8 +1,5 @@
 #include "Protocol/rtt/DefaultRTTEstimator.h"
 
-#include <cstdlib>
-#include <numeric>
-
 namespace SUP
 {
 DefaultRTTEstimator::DefaultRTTEstimator(const double initialRtt, double alpha, double initialVariance,

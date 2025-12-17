@@ -1,7 +1,6 @@
 add_library(StreamUPPlatform STATIC)
-add_library(StreamUP::Platform ALIAS StreamUPPlatform)
 
-target_include_directories(StreamUPPlatform PUBLIC include)
+target_include_directories(StreamUPPlatform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(Sources.cmake)
 
 if(UNIX OR APPLE)

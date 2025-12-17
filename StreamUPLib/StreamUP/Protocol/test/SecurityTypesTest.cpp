@@ -4,6 +4,8 @@
 
 #include "Protocol/AuthEncryptionTypes.h"
 
+#include "Platform/Address.h"
+
 using namespace SUP;
 
 bool openSSLHasCipherSuite(const std::string_view& name)
