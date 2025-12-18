@@ -4,7 +4,7 @@
 
 namespace SUP
 {
-class DefaultRTTEstimator : public RTTEstimator<DefaultRTTEstimator>
+class  DefaultRTTEstimator : public RTTEstimator<DefaultRTTEstimator>
 {
 
 public:

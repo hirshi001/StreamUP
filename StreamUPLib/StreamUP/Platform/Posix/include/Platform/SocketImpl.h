@@ -9,10 +9,10 @@
 
 namespace SUP
 {
-class Socket : public SocketInterface
+class SocketImpl : public SocketInterface
 {
 public:
-    Socket()
+    SocketImpl()
     {
         localSocket = socket(AF_INET, SOCK_DGRAM, 0);
         if (localSocket < 0)
@@ -21,15 +21,15 @@ public:
         }
     }
 
-    ~Socket();
+    ~SocketImpl();
 
-    Socket(const Socket &) = delete;
+    SocketImpl(const SocketImpl &) = delete;
 
-    Socket &operator=(const Socket &) = delete;
+    SocketImpl &operator=(const SocketImpl &) = delete;
 
-    Socket(Socket &&) = delete;
+    SocketImpl(SocketImpl &&) = delete;
 
-    Socket &operator=(Socket &&) = delete;
+    SocketImpl &operator=(SocketImpl &&) = delete;
 
     [[nodiscard]] int bind(const Address &address) // NOLINT(*-make-member-function-const)
     {

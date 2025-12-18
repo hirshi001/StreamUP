@@ -1,5 +1,5 @@
 target_sources(StreamUPPlatform PUBLIC
-        include/Platform/Socket.h
+        include/Platform/SocketImpl.h
 )
 
 target_sources(StreamUPPlatform PUBLIC

@@ -1,4 +1,5 @@
-add_library(StreamUPPlatform STATIC)
+add_library(StreamUPPlatform STATIC
+        include/Platform/Socket.h)
 
 target_include_directories(StreamUPPlatform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(Sources.cmake)
