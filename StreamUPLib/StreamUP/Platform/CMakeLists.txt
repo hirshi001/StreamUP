@@ -1,11 +1,14 @@
-add_library(StreamUPPlatform STATIC
-        include/Platform/Socket.h)
+add_library(StreamUPPlatform INTERFACE
+        test/AddressTest.cpp)
 
-target_include_directories(StreamUPPlatform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(Sources.cmake)
 
+target_include_directories(StreamUPPlatform INTERFACE include)
+
 if(UNIX OR APPLE)
-    add_subdirectory(Posix)
+    # add_subdirectory(Posix)
 else()
     message(FATAL_ERROR "Non Posix versions have not been implemented yet")
 endif()
+
+add_subdirectory(test)

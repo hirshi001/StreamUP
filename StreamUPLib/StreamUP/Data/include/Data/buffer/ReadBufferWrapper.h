@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "BufferUtil.h"
+#include "Data/buffer/BufferUtil.h"
 
 namespace SUP::BufferUtil
 {

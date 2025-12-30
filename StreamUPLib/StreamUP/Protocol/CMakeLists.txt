@@ -1,12 +1,6 @@
-add_library(StreamUPProtocol STATIC
-        include/Protocol/congestioncontrol/CongestionControl.h
-        include/Protocol/congestioncontrol/TCPCongestionControl.h
-        include/Protocol/rtt/RTTEstimator.h
-        include/Protocol/rtt/DefaultRTTEstimator.h
-        include/Protocol/AuthEncryptionTypes.h
-        include/Protocol/packet/SendPacket.h
-        src/rtt/DefaultRTTEstimator.cpp
-        include/Protocol/packet/SendPacketPool.h)
+add_library(StreamUPProtocol STATIC)
+
+include(Sources.cmake)
 
 target_include_directories(StreamUPProtocol PUBLIC include)
 

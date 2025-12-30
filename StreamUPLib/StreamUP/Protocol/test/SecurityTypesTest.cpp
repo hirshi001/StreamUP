@@ -4,7 +4,7 @@
 
 #include "Protocol/AuthEncryptionTypes.h"
 
-#include "Platform/Address.h"
+#include "../../Platform/include/Platform/Address.h"
 
 using namespace SUP;
 

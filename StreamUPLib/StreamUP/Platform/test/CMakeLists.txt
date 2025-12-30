@@ -1,0 +1,4 @@
+add_executable(StreamUPPlatformTests AddressTest.cpp)
+target_link_libraries(StreamUPPlatformTests PRIVATE Boost::unit_test_framework StreamUPPlatform)
+
+add_test(NAME StreamUPPlatformBoostTests COMMAND StreamUPPlatformTests)

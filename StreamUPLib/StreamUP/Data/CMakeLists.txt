@@ -1,12 +1,7 @@
-add_library(StreamUPData STATIC
-        include/Data/buffer/BufferUtil.h
-        include/Data/buffer/ReadBufferWrapper.h
-        include/Data/buffer/WriteBufferWrapper.h)
+add_library(StreamUPData INTERFACE)
 
-target_sources(StreamUPData PRIVATE
-        src/Placeholder.cpp
-)
+include(Sources.cmake)
 
-target_include_directories(StreamUPData PUBLIC include)
+target_include_directories(StreamUPData INTERFACE include)
 
 add_subdirectory(test)
