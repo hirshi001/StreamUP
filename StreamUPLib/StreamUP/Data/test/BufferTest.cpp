@@ -1,10 +1,10 @@
 // test_example.cpp
 #define BOOST_TEST_MODULE BufferTestModule
 
-#include <random>
+#include "Data/buffer/BufferUtil.h"
+
 #include <boost/test/included/unit_test.hpp> // header-only version
 
-#include "Data/buffer/BufferUtil.h"
 
 
 using namespace SUP;

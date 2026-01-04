@@ -1,10 +1,9 @@
-#include <random>
-#include <boost/test/unit_test.hpp>
-#include <openssl/ssl.h>
-
 #include "Protocol/AuthEncryptionTypes.h"
 
-#include "../../Platform/include/Platform/Address.h"
+#include <boost/test/unit_test.hpp>
+#include <openssl/ssl.h>
+#include <random>
+
 
 using namespace SUP;
 

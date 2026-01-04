@@ -1,0 +1,4 @@
+# Boost.Test umbrella header
+{
+  include: ["<boost/test/unit_test.hpp>", "public", "<boost/test/.*>"]
+}

@@ -1,27 +1,17 @@
 #pragma once
 
-
-#include <unordered_map>
-
-#include "Protocol/AuthEncryptionTypes.h"
-
-#include "Data/buffer/BufferUtil.h"
 #include "Data/buffer/ReadBufferWrapper.h"
-#include "Platform/Address.h"
-
-#include <vector>
-
-#include <openssl/evp.h>
-#include <openssl/rand.h>
-#include <openssl/ssl.h>
-
-#include "packet/SendPacket.h"
-#include "packet/SendPacketPool.h"
 #include "Platform/SocketInterface.h"
+#include "Protocol/AuthEncryptionTypes.h"
+#include "Protocol/packet/SendPacket.h"
+#include "Protocol/packet/SendPacketPool.h"
+
+#include <openssl/ssl.h>
+#include <openssl/types.h>
+
 
 namespace SUP
 {
-class Address;
 
 enum class SUPVersions
 {
@@ -60,7 +50,8 @@ public:
         this->allowInsecureConnections = allowInsecureConnections;
 
         ctx = SSL_CTX_new(TLS_method());
-        if (!ctx) throw std::runtime_error("Failed to create SSL_CTX");
+        if (!ctx)
+            throw std::runtime_error("Failed to create SSL_CTX");
 
         if (identityKey)
         {
@@ -72,14 +63,13 @@ public:
     ~Protocol()
     {
         SSL_CTX_free(ctx);
-        if (identityPrivateKey) EVP_PKEY_free(identityPrivateKey.value());
-        if (identityPublicKey) EVP_PKEY_free(identityPublicKey.value());
+        if (identityPrivateKey)
+            EVP_PKEY_free(identityPrivateKey.value());
+        if (identityPublicKey)
+            EVP_PKEY_free(identityPublicKey.value());
     }
 
-    void acceptPacket(const Address& address, uint8_t* data, int length)
-    {
-
-    }
+    void acceptPacket(const Address &address, uint8_t *data, int length) {}
 
 
     void acceptClientHandshake(const Address &address, uint8_t *data, int length)
@@ -95,10 +85,7 @@ public:
         if (!buffer.ensureReadableBytes(sizeof(uint8_t) * numSUPVersions))
             return AcceptClientHandshakeResult::ILL_FORMED_HANDSHAKE;
         std::vector<uint8_t> supVersions(numSUPVersions);
-        for (int i = 0; i < numSUPVersions; i++)
-        {
-            buffer.read(supVersions[i]);
-        }
+        for (int i = 0; i < numSUPVersions; i++) { buffer.read(supVersions[i]); }
 
         if (!buffer.ensureReadableBytes(sizeof(uint8_t)))
             return AcceptClientHandshakeResult::ILL_FORMED_HANDSHAKE;
@@ -152,7 +139,8 @@ public:
                     return;
                 buffer.readToArray(ephemeralKey.data(), ephemeralKeyLength);
 
-                std::optional<Security::EphemeralKeyGroup> group = Security::getEphemeralKeyGroup(ephemeralKeyTypeInt);
+                std::optional<Security::EphemeralKeyGroup> group = Security::getEphemeralKeyGroup(
+                    ephemeralKeyTypeInt);
                 if (!group)
                     continue;
 
@@ -172,7 +160,6 @@ public:
                 // TODO: Must send back a packet rejecting the handshake OR giving a list of supported ephemeral keys
                 return;
             }
-
         }
     }
 
@@ -192,14 +179,12 @@ private:
         return -1;
     }
 
-    std::unique_ptr<SendPacket> createSendPacket(int size)
-    {
-        return sendPacketPool.getSendPacket(size);
-    }
+    std::unique_ptr<SendPacket> createSendPacket(int size) { return sendPacketPool.getSendPacket(size); }
 
     void sendPacket(const SendPacket &sendPacket)
     {
-        socketInterface.sendTo(reinterpret_cast<char *>(sendPacket.data.data), sendPacket.data.getWriteIndex(), sendPacket.address);
+        socketInterface.sendTo(reinterpret_cast<char *>(sendPacket.data.data), sendPacket.data.getWriteIndex(),
+                               sendPacket.address);
     }
 
     SSL_CTX *ctx;
@@ -212,14 +197,11 @@ private:
     SendPacketPool sendPacketPool;
 
     SocketInterface socketInterface;
-
-
 };
 
 class Protocol
 {
 public:
-
     /**
      * Creates and sends a handshake packet to the server
      * @return

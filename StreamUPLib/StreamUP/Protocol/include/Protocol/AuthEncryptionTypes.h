@@ -1,12 +1,10 @@
 #pragma once
-#include <memory>
-#include <vector>
-#include <openssl/evp.h>
-#include <openssl/types.h>
 
-namespace SUP
-{
-namespace Security
+#include <array>
+#include <openssl/evp.h>
+
+
+namespace SUP::Security
 {
 enum class CipherSuite
 {
@@ -64,10 +62,14 @@ constexpr int ephemeralKeyGroupToOpenSSLNid(EphemeralKeyGroup keyType)
 {
     switch (keyType)
     {
-        case EphemeralKeyGroup::X448: return NID_X448;
-        case EphemeralKeyGroup::x25519: return NID_X25519;
-        case EphemeralKeyGroup::secp384r1: return NID_secp384r1;
-        case EphemeralKeyGroup::secp256r1: return NID_X9_62_prime256v1;
+        case EphemeralKeyGroup::X448:
+            return NID_X448;
+        case EphemeralKeyGroup::x25519:
+            return NID_X25519;
+        case EphemeralKeyGroup::secp384r1:
+            return NID_secp384r1;
+        case EphemeralKeyGroup::secp256r1:
+            return NID_X9_62_prime256v1;
     }
     __builtin_unreachable();
 }
@@ -86,6 +88,5 @@ constexpr std::optional<EphemeralKeyGroup> getEphemeralKeyGroup(const int id)
         default:
             return std::nullopt;
     }
-}
 }
 }

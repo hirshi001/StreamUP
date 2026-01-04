@@ -1,4 +1,5 @@
 #pragma once
+
 #include <array>
 #include <bit>
 #include <type_traits>

@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Protocol/packet/SendPacket.h"
+
 #include <map>
 
-#include "Protocol/packet/SendPacket.h"
 
 namespace SUP
 {
@@ -17,12 +18,9 @@ public:
 
     SendPacketPool &operator=(SendPacketPool &&) = delete;
 
-    explicit SendPacketPool(int margin) : margin(margin)
-    {
-    }
+    explicit SendPacketPool(int margin) : margin(margin) {}
 
-    ~SendPacketPool()
-    = default;
+    ~SendPacketPool() = default;
 
     /**
      *

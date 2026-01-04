@@ -1,10 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include <vector>
-
 #include "Data/buffer/WriteBufferWrapper.h"
-#include "Platform/Address.h"
+
+#include <vector>
 
 namespace SUP
 {
