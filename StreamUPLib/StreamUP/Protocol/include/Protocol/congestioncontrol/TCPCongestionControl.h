@@ -7,7 +7,6 @@
 
 namespace SUP
 {
-
 namespace detail
 {
 enum class TahoeStage
@@ -20,6 +19,7 @@ enum class TahoeStage
 class TCPCongestionControl : public CongestionControl
 {
     static constexpr int initCwnd = 1200;
+
 public:
     TCPCongestionControl()
     {
@@ -28,14 +28,9 @@ public:
         stage = detail::TahoeStage::SlowStart;
     }
 
-    virtual ~TCPCongestionControl()
-    {
+    ~TCPCongestionControl() override = default;
 
-    }
-
-    void onSend(int numBytes) override
-    {
-    }
+    void onSend(int numBytes) override {}
 
     void onAck(int numBytes, double rtt) override
     {
@@ -43,10 +38,7 @@ public:
         {
             case detail::TahoeStage::SlowStart:
                 cWnd += numBytes;
-                if (cWnd >= ssThresh)
-                {
-                    stage = detail::TahoeStage::CongestionAvoidance;
-                }
+                if (cWnd >= ssThresh) { stage = detail::TahoeStage::CongestionAvoidance; }
                 break;
             case detail::TahoeStage::CongestionAvoidance:
                 cWnd += (getMSS() * numBytes / cWnd);
@@ -61,10 +53,7 @@ public:
         stage = detail::TahoeStage::SlowStart;
     }
 
-    int getCongestionWindow() const override
-    {
-        return cWnd;
-    }
+    [[nodiscard]] int getCongestionWindow() const override { return cWnd; }
 
 private:
     int cWnd;

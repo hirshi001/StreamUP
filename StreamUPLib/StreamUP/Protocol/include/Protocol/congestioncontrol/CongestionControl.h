@@ -4,8 +4,9 @@ namespace SUP
 {
 class CongestionControl
 {
-
 public:
+    virtual ~CongestionControl() = default;
+
     /**
      * Callback to be called when bytes are sent
      * @param numBytes
@@ -24,11 +25,10 @@ public:
      * Callback for when a timeout occurs
      * @param
      */
-     virtual void onTimeout(int numBytes, double timeout) = 0;
+    virtual void onTimeout(int numBytes, double timeout) = 0;
 
-    virtual int getCongestionWindow() const = 0;
+    [[nodiscard]] virtual int getCongestionWindow() const = 0;
 
-    int getMSS() const;
-
+    [[nodiscard]] int getMSS() const;
 };
 }
