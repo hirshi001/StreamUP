@@ -1,28 +1,43 @@
 #pragma once
 
+#include <cassert>
+
 #include "Data/buffer/ReadBufferWrapper.h"
 #include "Platform/SocketInterface.h"
 #include "Protocol/AuthEncryptionTypes.h"
 #include "Protocol/packet/SendPacket.h"
 #include "Protocol/packet/SendPacketPool.h"
 
+#include <expected>
 #include <openssl/ssl.h>
 #include <openssl/types.h>
-
+#include <memory>
 
 namespace SUP
 {
+using SSL_CTX_ptr = std::unique_ptr<SSL_CTX, decltype(&SSL_CTX_free)>;
+struct EVP_PKEY_handle {
+    EVP_PKEY* p;
+
+    explicit EVP_PKEY_handle(EVP_PKEY* p) : p(p) {}
+    ~EVP_PKEY_handle()
+    {
+        if (p)
+            EVP_PKEY_free(p);
+    }
+
+    [[nodiscard]] EVP_PKEY* get() const noexcept { return p; }
+
+    EVP_PKEY_handle(EVP_PKEY_handle&&) = delete;
+    EVP_PKEY_handle(EVP_PKEY_handle const&) = delete;
+};
+using EVP_PKEY_ptr = std::shared_ptr<EVP_PKEY_handle>;
 
 enum class SUPVersions
 {
     V1 = 1
 };
 
-struct IdentityKeys
-{
-    EVP_PKEY *identityPrivateKey;
-    EVP_PKEY *identityPublicKey;
-};
 
 class Protocol
 {
@@ -37,37 +52,81 @@ public:
 
     Protocol &operator=(Protocol &&) = delete;
 
-    Protocol(
-        const std::vector<Security::CipherSuite> &_cipherSuites,
-        const std::vector<Security::EphemeralKeyGroup> &supportedEphemeralGroups,
-        const std::optional<IdentityKeys> &identityKey,
-        bool allowInsecureConnections = false
-    )
+    enum class CreateProtocolError
     {
-        sendPacketPool.addClassSize(1200);
-        this->cipherSuitesAvailable = _cipherSuites;
-        this->supportedEphemeralGroups = supportedEphemeralGroups;
-        this->allowInsecureConnections = allowInsecureConnections;
+        FAILED_TO_CREATE_SSL_CTX,
+        MISSING_PRIVATE_KEY,
+        MISSING_PUBLIC_KEY,
+        MISSING_CIPHER_SUITES,
+        MISSING_EPHEMERAL_GROUPS
+    };
 
-        ctx = SSL_CTX_new(TLS_method());
-        if (!ctx)
-            throw std::runtime_error("Failed to create SSL_CTX");
+    struct Config final
+    {
+        std::vector<Security::CipherSuite> cipherSuites;
+        std::vector<Security::EphemeralKeyGroup> supportedEphemeralGroups;
+        EVP_PKEY_ptr privateKey = nullptr;
+        EVP_PKEY_ptr publicKey = nullptr;
+        bool allowInsecureConnections;
+    };
 
-        if (identityKey)
+    static std::expected<std::unique_ptr<Protocol>, CreateProtocolError> createProtocol(const Protocol::Config& config)
+    {
+
+        if (!config.allowInsecureConnections)
         {
-            this->identityPrivateKey = EVP_PKEY_dup(identityKey->identityPrivateKey);
-            this->identityPublicKey = EVP_PKEY_dup(identityKey->identityPublicKey);
+            if (config.cipherSuites.empty())
+                return std::unexpected(CreateProtocolError::MISSING_CIPHER_SUITES);
+            if (config.supportedEphemeralGroups.empty())
+                return std::unexpected(CreateProtocolError::MISSING_EPHEMERAL_GROUPS);
         }
+
+        if (config.privateKey || config.publicKey) // If one is provided, both must be provided
+        {
+            if (!config.privateKey)
+                return std::unexpected(CreateProtocolError::MISSING_PRIVATE_KEY);
+            if (!config.publicKey)
+                return std::unexpected(CreateProtocolError::MISSING_PUBLIC_KEY);
+        }
+
+        SSL_CTX_ptr ctx{SSL_CTX_new(TLS_method()), SSL_CTX_free};
+        if (!ctx)
+            return std::unexpected(CreateProtocolError::FAILED_TO_CREATE_SSL_CTX);
+
+        return std::unique_ptr<Protocol>(new Protocol(std::move(ctx), config.cipherSuites, config.supportedEphemeralGroups, config.privateKey, config.publicKey, false));
     }
 
-    ~Protocol()
+private:
+    explicit Protocol(SSL_CTX_ptr ctx,
+             const std::vector<Security::CipherSuite> &cipherSuitesAvailable,
+             const std::vector<Security::EphemeralKeyGroup> &supportedEphemeralGroups,
+             const EVP_PKEY_ptr& privateKey,
+             const EVP_PKEY_ptr& publicKey,
+             const bool allowInsecureConnections = false) : ctx(std::move(ctx)),
+                                                            allowInsecureConnections(allowInsecureConnections),
+                                                            sendPacketPool(32)
     {
-        SSL_CTX_free(ctx);
-        if (identityPrivateKey)
-            EVP_PKEY_free(identityPrivateKey.value());
-        if (identityPublicKey)
-            EVP_PKEY_free(identityPublicKey.value());
+        assert(ctx != nullptr);
+        if (!allowInsecureConnections)
+        {
+            assert(!cipherSuitesAvailable.empty());
+            assert(!supportedEphemeralGroups.empty());
+        }
+
+        if (privateKey || publicKey)
+        {
+            assert(privateKey);
+            assert(publicKey);
+        }
+
+        this->ctx = std::move(ctx);
+        this->supportedEphemeralGroups = supportedEphemeralGroups;
+        this->cipherSuitesAvailable = cipherSuitesAvailable;
+        this->identityPrivateKey = privateKey;
+        this->identityPublicKey = publicKey;
     }
+public:
+    ~Protocol() = default;
 
     void acceptPacket(const Address &address, uint8_t *data, int length) {}
 
@@ -187,33 +246,16 @@ private:
                                sendPacket.address);
     }
 
-    SSL_CTX *ctx;
-    std::optional<EVP_PKEY *> identityPrivateKey;
-    std::optional<EVP_PKEY *> identityPublicKey;
+    SSL_CTX_ptr ctx;
+    EVP_PKEY_ptr identityPrivateKey;
+    EVP_PKEY_ptr identityPublicKey;
     std::vector<Security::CipherSuite> cipherSuitesAvailable;
     std::vector<Security::EphemeralKeyGroup> supportedEphemeralGroups;
-    std::unordered_map<Address, P>;
     bool allowInsecureConnections;
     SendPacketPool sendPacketPool;
 
     SocketInterface socketInterface;
 };
 
-class Protocol
-{
-public:
-    /**
-     * Creates and sends a handshake packet to the server
-     * @return
-     */
-    // HandshakeData generateHandshakePacket();
 
-
-    /**
-     * Creates and multiple handshake packets of the given sizes to the server
-     * @return
-     */
-    // HandshakeData generateHandshakePacket(std::vector<int> sizes);
-private:
-};
 }
