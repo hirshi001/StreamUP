@@ -9,9 +9,9 @@
 #include "Protocol/packet/SendPacketPool.h"
 
 #include <expected>
+#include <memory>
 #include <openssl/ssl.h>
 #include <openssl/types.h>
-#include <memory>
 
 namespace SUP
 {
