@@ -1,13 +1,16 @@
 #pragma once
 
-#include <cassert>
-
-#include "Data/buffer/ReadBufferWrapper.h"
-#include "Platform/SocketInterface.h"
 #include "Protocol/AuthEncryptionTypes.h"
+#include "Protocol/connection/Connection.h"
+#include "Protocol/connection/ConnectionManager.h"
+#include "Protocol/packet/Packet.h"
 #include "Protocol/packet/SendPacket.h"
 #include "Protocol/packet/SendPacketPool.h"
 
+#include "Platform/SocketInterface.h"
+#include "Data/buffer/ReadBufferWrapper.h"
+
+#include <cassert>
 #include <expected>
 #include <memory>
 #include <openssl/ssl.h>
@@ -16,21 +19,26 @@
 namespace SUP
 {
 using SSL_CTX_ptr = std::unique_ptr<SSL_CTX, decltype(&SSL_CTX_free)>;
-struct EVP_PKEY_handle {
-    EVP_PKEY* p;
 
-    explicit EVP_PKEY_handle(EVP_PKEY* p) : p(p) {}
+struct EVP_PKEY_handle
+{
+    EVP_PKEY *p;
+
+    explicit EVP_PKEY_handle(EVP_PKEY *p) : p(p) {}
+
     ~EVP_PKEY_handle()
     {
         if (p)
             EVP_PKEY_free(p);
     }
 
-    [[nodiscard]] EVP_PKEY* get() const noexcept { return p; }
+    [[nodiscard]] EVP_PKEY *get() const noexcept { return p; }
 
-    EVP_PKEY_handle(EVP_PKEY_handle&&) = delete;
-    EVP_PKEY_handle(EVP_PKEY_handle const&) = delete;
+    EVP_PKEY_handle(EVP_PKEY_handle &&) = delete;
+
+    EVP_PKEY_handle(EVP_PKEY_handle const &) = delete;
 };
+
 using EVP_PKEY_ptr = std::shared_ptr<EVP_PKEY_handle>;
 
 enum class SUPVersions
@@ -70,9 +78,8 @@ public:
         bool allowInsecureConnections;
     };
 
-    static std::expected<std::unique_ptr<Protocol>, CreateProtocolError> createProtocol(const Protocol::Config& config)
+    static std::expected<std::unique_ptr<Protocol>, CreateProtocolError> createProtocol(const Protocol::Config &config)
     {
-
         if (!config.allowInsecureConnections)
         {
             if (config.cipherSuites.empty())
@@ -93,18 +100,21 @@ public:
         if (!ctx)
             return std::unexpected(CreateProtocolError::FAILED_TO_CREATE_SSL_CTX);
 
-        return std::unique_ptr<Protocol>(new Protocol(std::move(ctx), config.cipherSuites, config.supportedEphemeralGroups, config.privateKey, config.publicKey, false));
+        return std::unique_ptr<Protocol>(new Protocol(std::move(ctx), config.cipherSuites,
+                                                      config.supportedEphemeralGroups, config.privateKey,
+                                                      config.publicKey, false));
     }
 
 private:
     explicit Protocol(SSL_CTX_ptr ctx,
-             const std::vector<Security::CipherSuite> &cipherSuitesAvailable,
-             const std::vector<Security::EphemeralKeyGroup> &supportedEphemeralGroups,
-             const EVP_PKEY_ptr& privateKey,
-             const EVP_PKEY_ptr& publicKey,
-             const bool allowInsecureConnections = false) : ctx(std::move(ctx)),
-                                                            allowInsecureConnections(allowInsecureConnections),
-                                                            sendPacketPool(32)
+                      const std::vector<Security::CipherSuite> &cipherSuitesAvailable,
+                      const std::vector<Security::EphemeralKeyGroup> &supportedEphemeralGroups,
+                      const EVP_PKEY_ptr &privateKey,
+                      const EVP_PKEY_ptr &publicKey,
+                      const bool allowInsecureConnections = false) : ctx(std::move(ctx)),
+                                                                     allowInsecureConnections(allowInsecureConnections),
+                                                                     sendPacketPool(32),
+                                                                     connectionManager()
     {
         assert(ctx != nullptr);
         if (!allowInsecureConnections)
@@ -125,10 +135,36 @@ private:
         this->identityPrivateKey = privateKey;
         this->identityPublicKey = publicKey;
     }
+
 public:
+
     ~Protocol() = default;
 
-    void acceptPacket(const Address &address, uint8_t *data, int length) {}
+
+    /**
+     * Returns the corresponding connection for the packet
+     * @param packet
+     */
+    Connection* getConnectionForPacket(const std::unique_ptr<Packet> &packet)
+    {
+        BufferUtil::ReadBufferWrapper reader(packet->buffer.data(), packet->buffer.size());
+        auto connectionId = reader.read<Connection::ConnectionId>();
+
+        // TODO: Make sure multiple connection ids per packet are handled properly
+        Connection* connection = connectionManager.getConnection(connectionId);
+        if (!connection)
+            connection = connectionManager.addNewConnection(connectionId);
+        return connection;
+    }
+
+    /**
+     * Used to create a connection that can connect to another server
+     * @return
+     */
+    Connection* createNewConnection()
+    {
+        return connectionManager.addNewConnection(...); // TODO: Create a ConnectionId Generator/Handler
+    }
 
 
     void acceptClientHandshake(const Address &address, uint8_t *data, int length)
@@ -255,7 +291,6 @@ private:
     SendPacketPool sendPacketPool;
 
     SocketInterface socketInterface;
+    ConnectionManager connectionManager;
 };
-
-
 }

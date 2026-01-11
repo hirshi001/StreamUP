@@ -338,6 +338,8 @@
     <option name="/Default/CodeStyle/CppIncludeDirective/SortIncludeDirectives/@EntryValue" value="true" type="bool" />
     <option name="/Default/CodeStyle/CppIncludeDirective/UseRelativePaths/@EntryValue" value="Never" type="string" />
     <option name="/Default/CodeStyle/CppPreferForwardDeclaration/PreferForwardDeclarations/@EntryValue" value="false" type="bool" />
+    <option name="/Default/CodeStyle/CppSortIncludes/GroupByRootDirectory/@EntryValue" value="true" type="bool" />
+    <option name="/Default/CodeStyle/CppSortIncludes/IncludeSortCategories/@EntryValue" value="&lt;CppIncludeCategories&gt;&#10;  &lt;CppIncludeCategorySetting Pattern=&quot;^&amp;quot;.*&quot; Description=&quot;#include &amp;quot;header&amp;quot;&quot; Group=&quot;2&quot; Order=&quot;2&quot; /&gt;&#10;  &lt;CppIncludeCategorySetting Pattern=&quot;^&amp;lt;.*&quot; Description=&quot;#include &amp;lt;header&amp;gt;&quot; Group=&quot;3&quot; Order=&quot;3&quot; /&gt;&#10;&lt;/CppIncludeCategories&gt;" type="string" />
     <option name="/Default/CodeStyle/EditorConfig/EnableClangFormatSupport/@EntryValue" value="false" type="bool" />
   </component>
 </project>
