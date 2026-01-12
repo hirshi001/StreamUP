@@ -2,6 +2,7 @@
 
 #include "Protocol/AuthEncryptionTypes.h"
 #include "Protocol/connection/Connection.h"
+#include "Protocol/connection/ConnectionIdHandler.h"
 #include "Protocol/connection/ConnectionManager.h"
 #include "Protocol/packet/Packet.h"
 #include "Protocol/packet/SendPacket.h"
@@ -148,12 +149,16 @@ public:
     Connection* getConnectionForPacket(const std::unique_ptr<Packet> &packet)
     {
         BufferUtil::ReadBufferWrapper reader(packet->buffer.data(), packet->buffer.size());
-        auto connectionId = reader.read<Connection::ConnectionId>();
+        Connection::ConnectionId connectionId;
+        for (int i = 0; i < Connection::CONNECTION_ID_SIZE; i++)
+        {
+            connectionId[i] = reader.read<uint8_t>();
+        }
 
         // TODO: Make sure multiple connection ids per packet are handled properly
         Connection* connection = connectionManager.getConnection(connectionId);
-        if (!connection)
-            connection = connectionManager.addNewConnection(connectionId);
+        if (!connection) // TODO: Check that the packet follows the format for creating new connections, otherwise we are creating a new connection object for nothing.
+            connection = connectionManager.addNewConnection();
         return connection;
     }
 

@@ -2,7 +2,8 @@ add_library(StreamUPProtocol STATIC
         include/Protocol/packet/Packet.h
         include/Protocol/connection/Connection.h
         include/Protocol/stream/Stream.h
-        include/Protocol/connection/ConnectionManager.h)
+        include/Protocol/connection/ConnectionManager.h
+        include/Protocol/connection/ConnectionIdHandler.h)
 
 include(Sources.cmake)
 

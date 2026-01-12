@@ -9,6 +9,8 @@ namespace SUP
 class ConnectionManager
 {
 public:
+    ConnectionManager() = default;
+
     Connection *getConnection(Connection::ConnectionId id)
     {
         const auto connectionIter = connections.find(id);
@@ -26,9 +28,10 @@ public:
         return connection;
     }
 
-    Connection* addNewConnection(Connection::ConnectionId id)
+    Connection* addNewConnection()
     {
-        auto connection = new Connection();
+        const auto id = connectionIdHandler.getNewConnectionId();
+        const auto connection = new Connection();
         connection->addConnectionId(id);
         connections[id] = connection;
         return connection;
@@ -36,5 +39,6 @@ public:
 
 private:
     std::map<Connection::ConnectionId, Connection *> connections;
+    ConnectionIdHandler connectionIdHandler;
 };
 }

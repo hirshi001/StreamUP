@@ -7,10 +7,22 @@
 
 namespace SUP
 {
+template <typename T>
+concept ByteArray =
+    requires {
+    typename T::value_type;
+    T{}.size();
+    } &&
+    std::is_same_v<T, std::array<typename T::value_type, T{}.size()>> &&
+    std::is_same_v<typename T::value_type, std::uint8_t>;
+
 class Connection
 {
 public:
-    using ConnectionId = uint64_t;
+    static constexpr int CONNECTION_ID_SIZE = 12;
+    using ConnectionId = std::array<uint8_t, CONNECTION_ID_SIZE>;
+    static_assert(ByteArray<Connection::ConnectionId>);
+
     using StreamId = uint32_t; // TODO: Make StreamId VarInt
     std::vector<ConnectionId> connectionIds;
     std::map<StreamId, Stream> streams;
