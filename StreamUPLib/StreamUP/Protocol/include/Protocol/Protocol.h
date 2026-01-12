@@ -168,7 +168,7 @@ public:
      */
     Connection* createNewConnection()
     {
-        return connectionManager.addNewConnection(...); // TODO: Create a ConnectionId Generator/Handler
+        return connectionManager.addNewConnection();
     }
 
 
