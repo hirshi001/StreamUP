@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Platform/Address.h"
+#include "../endpoint/Address.h"
 
 #include <utility>
 #include <vector>

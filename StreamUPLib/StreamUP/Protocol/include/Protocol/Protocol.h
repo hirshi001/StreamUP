@@ -8,17 +8,22 @@
 #include "Protocol/packet/SendPacket.h"
 #include "Protocol/packet/SendPacketPool.h"
 
-#include "Platform/SocketInterface.h"
 #include "Data/buffer/ReadBufferWrapper.h"
 
 #include <cassert>
+#include <chrono>
 #include <expected>
+#include <functional>
 #include <memory>
 #include <openssl/ssl.h>
 #include <openssl/types.h>
 
 namespace SUP
 {
+using SendPacketHandler = std::function<void(std::unique_ptr<SendPacket>)>;
+using NewConnectionHandler = std::function<void(Connection *)>;
+using ConnectionClosedHandler = std::function<void(Connection *)>;
+
 using SSL_CTX_ptr = std::unique_ptr<SSL_CTX, decltype(&SSL_CTX_free)>;
 
 struct EVP_PKEY_handle
@@ -79,7 +84,13 @@ public:
         bool allowInsecureConnections;
     };
 
-    static std::expected<std::unique_ptr<Protocol>, CreateProtocolError> createProtocol(const Protocol::Config &config)
+    struct Handlers final
+    {
+        SendPacketHandler sendPacketHandler;
+    };
+
+    static std::expected<std::unique_ptr<Protocol>, CreateProtocolError> createProtocol(
+        const Protocol::Config &config, const Protocol::Handlers &handlers)
     {
         if (!config.allowInsecureConnections)
         {
@@ -103,7 +114,7 @@ public:
 
         return std::unique_ptr<Protocol>(new Protocol(std::move(ctx), config.cipherSuites,
                                                       config.supportedEphemeralGroups, config.privateKey,
-                                                      config.publicKey, false));
+                                                      config.publicKey, false, handlers));
     }
 
 private:
@@ -112,10 +123,12 @@ private:
                       const std::vector<Security::EphemeralKeyGroup> &supportedEphemeralGroups,
                       const EVP_PKEY_ptr &privateKey,
                       const EVP_PKEY_ptr &publicKey,
-                      const bool allowInsecureConnections = false) : ctx(std::move(ctx)),
-                                                                     allowInsecureConnections(allowInsecureConnections),
-                                                                     sendPacketPool(32),
-                                                                     connectionManager()
+                      const bool allowInsecureConnections,
+                      const Handlers &handlers) : ctx(std::move(ctx)),
+                                                  allowInsecureConnections(allowInsecureConnections),
+                                                  sendPacketPool(32),
+                                                  connectionManager(),
+                                                  handlers(handlers)
     {
         assert(ctx != nullptr);
         if (!allowInsecureConnections)
@@ -138,7 +151,6 @@ private:
     }
 
 public:
-
     ~Protocol() = default;
 
 
@@ -146,18 +158,16 @@ public:
      * Returns the corresponding connection for the packet
      * @param packet
      */
-    Connection* getConnectionForPacket(const std::unique_ptr<Packet> &packet)
+    Connection *getConnectionForPacket(const std::unique_ptr<Packet> &packet)
     {
         BufferUtil::ReadBufferWrapper reader(packet->buffer.data(), packet->buffer.size());
         Connection::ConnectionId connectionId;
-        for (int i = 0; i < Connection::CONNECTION_ID_SIZE; i++)
-        {
-            connectionId[i] = reader.read<uint8_t>();
-        }
+        for (int i = 0; i < Connection::CONNECTION_ID_SIZE; i++) { connectionId[i] = reader.read<uint8_t>(); }
 
         // TODO: Make sure multiple connection ids per packet are handled properly
-        Connection* connection = connectionManager.getConnection(connectionId);
-        if (!connection) // TODO: Check that the packet follows the format for creating new connections, otherwise we are creating a new connection object for nothing.
+        Connection *connection = connectionManager.getConnection(connectionId);
+        if (!connection)
+            // TODO: Check that the packet follows the format for creating new connections, otherwise we are creating a new connection object for nothing.
             connection = connectionManager.addNewConnection();
         return connection;
     }
@@ -166,9 +176,11 @@ public:
      * Used to create a connection that can connect to another server
      * @return
      */
-    Connection* createNewConnection()
+    Connection *createNewConnection() { return connectionManager.addNewConnection(); }
+
+    void advance_time(std::chrono::milliseconds delta)
     {
-        return connectionManager.addNewConnection();
+
     }
 
 
@@ -281,11 +293,7 @@ private:
 
     std::unique_ptr<SendPacket> createSendPacket(int size) { return sendPacketPool.getSendPacket(size); }
 
-    void sendPacket(const SendPacket &sendPacket)
-    {
-        socketInterface.sendTo(reinterpret_cast<char *>(sendPacket.data.data), sendPacket.data.getWriteIndex(),
-                               sendPacket.address);
-    }
+    void sendPacket(std::unique_ptr<SendPacket> sendPacket) { sendPacketHandler(std::move(sendPacket)); }
 
     SSL_CTX_ptr ctx;
     EVP_PKEY_ptr identityPrivateKey;
@@ -295,7 +303,7 @@ private:
     bool allowInsecureConnections;
     SendPacketPool sendPacketPool;
 
-    SocketInterface socketInterface;
     ConnectionManager connectionManager;
+    Handlers handlers;
 };
 }

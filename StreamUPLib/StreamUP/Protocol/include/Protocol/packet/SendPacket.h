@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Data/buffer/WriteBufferWrapper.h"
-#include "Platform/Address.h"
+
+#include "../endpoint/Address.h"
 
 #include <vector>
 

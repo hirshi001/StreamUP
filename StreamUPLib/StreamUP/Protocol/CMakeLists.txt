@@ -3,7 +3,9 @@ add_library(StreamUPProtocol STATIC
         include/Protocol/connection/Connection.h
         include/Protocol/stream/Stream.h
         include/Protocol/connection/ConnectionManager.h
-        include/Protocol/connection/ConnectionIdHandler.h)
+        include/Protocol/connection/ConnectionIdHandler.h
+        include/Protocol/endpoint/Address.h
+)
 
 include(Sources.cmake)
 
@@ -12,7 +14,7 @@ target_include_directories(StreamUPProtocol PUBLIC include)
 
 find_package(OpenSSL REQUIRED)
 
-target_link_libraries(StreamUPProtocol PRIVATE OpenSSL::SSL OpenSSL::Crypto PUBLIC StreamUPData StreamUPPlatform)
+target_link_libraries(StreamUPProtocol PRIVATE OpenSSL::SSL OpenSSL::Crypto PUBLIC StreamUPData)
 
 
 add_subdirectory(test)
