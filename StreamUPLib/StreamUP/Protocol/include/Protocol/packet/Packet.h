@@ -17,7 +17,7 @@ struct Packet
 
     Packet &operator=(Packet &&) = delete;
 
-    explicit Packet(const Address &address, const std::vector<uint8_t>& buffer) // NOLINT
+    explicit Packet(const Address &address, const uint8_t* buffer, size_t length) // NOLINT
         : address(address), buffer(buffer) {}
 
 

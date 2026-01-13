@@ -1,8 +1,6 @@
 #include "Protocol/Protocol.h"
 
 #include <iostream>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
 #include <netdb.h>
@@ -10,61 +8,18 @@
 #include <stdexcept>
 #include <thread>
 
+#include <asio.hpp>
 #include <boost/test/unit_test.hpp> // header-only version
 
 #include <sys/fcntl.h>
-
-int sock;
-
-
-
-int create_udp_socket(uint16_t port)
+struct SocketData
 {
-    addrinfo hints{};
-    hints.ai_family = AF_UNSPEC; // IPv4 or IPv6
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE; // Bind to local addresses
+    SocketData() : socket(io_context) {}
 
-    addrinfo *result = nullptr;
-    int rc = getaddrinfo(nullptr, std::to_string(port).c_str(),
-                         &hints, &result);
-    if (rc != 0) { throw std::runtime_error(gai_strerror(rc)); }
+    asio::io_context io_context;
+    asio::ip::udp::socket socket;
+};
 
-    int sock = -1;
-
-    for (addrinfo *ai = result; ai != nullptr; ai = ai->ai_next)
-    {
-        sock = ::socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-        if (sock < 0)
-            continue;
-
-        // Optional but recommended: allow fast rebinding
-        int yes = 1;
-        setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
-
-        if (::bind(sock, ai->ai_addr, ai->ai_addrlen) == 0)
-        {
-            break; // success
-        }
-
-        ::close(sock);
-        sock = -1;
-    }
-
-    freeaddrinfo(result);
-
-    if (sock < 0) { throw std::runtime_error("failed to bind UDP socket"); }
-
-    return sock;
-}
-
-void set_nonblocking(int sock)
-{
-    int flags = fcntl(sock, F_GETFL, 0);
-    if (flags == -1) { throw std::runtime_error("fcntl(F_GETFL) failed"); }
-
-    if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1) { throw std::runtime_error("fcntl(F_SETFL) failed"); }
-}
 
 void sendPacketHandler(std::unique_ptr<SUP::SendPacket> packet)
 {
@@ -116,13 +71,18 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
     std::unique_ptr<Protocol> protocol = std::move(protocolCreationResult.value());
 
     // Step 2. Create socket which receives packets
-    sock = create_udp_socket(1234);
-    set_nonblocking(sock);
+    SocketData sockData;
+    sockData.socket.open(asio::ip::udp::v6());
+
+    asio::ip::v6_only dualStack(false);
+    sockData.socket.set_option(dualStack);
+
+    asio::ip::udp::endpoint localEndpoint(asio::ip::udp::v6(), 12345);
+    sockData.socket.bind(localEndpoint);
 
     // Step 3. Event Loop
     std::array<uint8_t, 2048> buf{};
-    sockaddr_storage src{};
-    socklen_t srclen = sizeof(src);
+    asio::ip::udp::endpoint src;
 
     using namespace std::chrono;
     using clock = steady_clock;
@@ -141,11 +101,10 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
         protocol->advance_time(elapsed);
 
         // receive
-        ssize_t n;
+        size_t n;
         while (true)
         {
-            n = recvfrom(sock, buf.data(), sizeof(buf), 0,
-                         reinterpret_cast<sockaddr *>(&src), &srclen);
+            n = sockData.socket.receive_from(asio::buffer(buf.data(), buf.size()), src);
 
             if (n < 0)
             {
@@ -153,6 +112,7 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
                     break; // no more packets
                 throw std::runtime_error("recvfrom failed");
             }
+            src.
             auto packet = std::make_unique<SUP::Packet>();
             protocol->getConnectionForPacket()
             handle_packet(buf, n, src);
