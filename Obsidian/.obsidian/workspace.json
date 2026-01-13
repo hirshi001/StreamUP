@@ -1,0 +1,192 @@
+{
+  "main": {
+    "id": "e850cbbe8f867905",
+    "type": "split",
+    "children": [
+      {
+        "id": "4a8975a202a392b5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "78fd8e8c84395092",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "StreamUP/MultiPath Functionality.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "MultiPath Functionality"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "114b0b8b4d717b4d",
+    "type": "split",
+    "children": [
+      {
+        "id": "2bb7d4e302c60952",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c8f7fcdff89ff60b",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "a4b23c2630a1d268",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "ef9b9a583f448f18",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e6b42ed7630188ed",
+    "type": "split",
+    "children": [
+      {
+        "id": "84012b305c09144e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0beb48305ba4c094",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "StreamUP/MultiPath Functionality.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for MultiPath Functionality"
+            }
+          },
+          {
+            "id": "67895578b43ea01c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "StreamUP/MultiPath Functionality.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from MultiPath Functionality"
+            }
+          },
+          {
+            "id": "377729683ad700f2",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "5571de844a2563f9",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "d7d5ecd7162f460a",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "StreamUP/MultiPath Functionality.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of MultiPath Functionality"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "78fd8e8c84395092",
+  "lastOpenFiles": [
+    "StreamUP/Weighted Priority with Starvability Option.md",
+    "StreamUP/MultiPath Functionality.md",
+    "StreamUP/Channel Parameters.md"
+  ]
+}
