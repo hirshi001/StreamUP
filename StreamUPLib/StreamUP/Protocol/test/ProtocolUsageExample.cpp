@@ -90,9 +90,6 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
 
     std::unique_ptr<Protocol<AddressT> > protocol = std::move(protocolCreationResult.value());
 
-    // Step 2. Create socket which receives packets
-
-
     // Step 3. Event Loop
     std::array<uint8_t, 2048> buf{};
     asio::ip::udp::endpoint src;
