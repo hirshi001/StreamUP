@@ -34,10 +34,8 @@ void sendPacketHandler(std::shared_ptr<SocketData> sockData, std::unique_ptr<Sen
     {
         size_t bytesSent = sockData->socket.send_to(asio::const_buffer(buffer.data, buffer.getWriteIndex()), dst);
         assert(bytesSent == buffer.getWriteIndex());
-    }catch (const asio::system_error& e)
-    {
-        std::cerr << "Failed to send packet: " << e.what() << std::endl;
     }
+    catch (const asio::system_error &e) { std::cerr << "Failed to send packet: " << e.what() << std::endl; }
 }
 
 
@@ -49,6 +47,8 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
 
     asio::ip::v6_only dualStack(false);
     sockData->socket.set_option(dualStack);
+
+    sockData->socket.non_blocking(true);
 
     asio::ip::udp::endpoint localEndpoint(asio::ip::udp::v6(), 12345);
     sockData->socket.bind(localEndpoint);
@@ -114,16 +114,15 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
         size_t n;
         while (true)
         {
-            n = sockData->socket.receive_from(asio::buffer(buf.data(), buf.size()), src);
-
-            if (n < 0)
+            try { n = sockData->socket.receive_from(asio::buffer(buf.data(), buf.size()), src); }
+            catch (const asio::system_error &e)
             {
-                if (errno == EAGAIN || errno == EWOULDBLOCK)
-                    break; // no more packets
-                throw std::runtime_error("recvfrom failed");
+                if (e.code() == asio::error::would_block)
+                    break; // No more data to read
+                std::cerr << "Failed to receive from: " << e.what() << std::endl;
             }
 
-            Packet packet(src, buf.data(), buf.size());
+            Packet packet(src, buf.data(), n);
             auto connection = protocol->getConnectionForPacket(packet);
             connection->handlePacket(packet);
         }
@@ -131,5 +130,4 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-
 }
