@@ -2,12 +2,12 @@
 
 #include "Data/buffer/WriteBufferWrapper.h"
 
-#include "../endpoint/Address.h"
-
 #include <vector>
 
 namespace SUP
 {
+
+template <typename Endpoint>
 struct SendPacket
 {
     SendPacket(SendPacket &) = delete;
@@ -19,7 +19,7 @@ struct SendPacket
     SendPacket &operator=(SendPacket &&) = delete;
 
     explicit SendPacket(int size)
-        : buffer(size), data(buffer.data(), size) {}
+        : buffer(size), address(), data(buffer.data(), size) {}
 
 
     [[nodiscard]] size_t bufferCapacity() const { return buffer.size(); }
@@ -28,7 +28,7 @@ private:
     std::vector<uint8_t> buffer;
 
 public:
-    Address address;
+    Endpoint address;
     BufferUtil::WriteBufferWrapper data;
 };
 }

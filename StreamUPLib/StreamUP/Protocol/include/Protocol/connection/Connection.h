@@ -16,6 +16,7 @@ concept ByteArray =
     std::is_same_v<T, std::array<typename T::value_type, T{}.size()>> &&
     std::is_same_v<typename T::value_type, std::uint8_t>;
 
+template<typename Address>
 class Connection
 {
 public:
@@ -26,6 +27,7 @@ public:
     using StreamId = uint32_t; // TODO: Make StreamId VarInt
     std::vector<ConnectionId> connectionIds;
     std::map<StreamId, Stream> streams;
+    Address remoteEndpoint;
 
     void addConnectionId(ConnectionId connectionId)
     {

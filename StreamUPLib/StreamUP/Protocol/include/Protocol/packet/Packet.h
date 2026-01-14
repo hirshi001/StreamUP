@@ -1,29 +1,18 @@
 #pragma once
 
-#include "../endpoint/Address.h"
-
 #include <utility>
 #include <vector>
 
 namespace SUP
 {
+template<typename Endpoint>
 struct Packet
 {
-    Packet(Packet &) = delete;
+    explicit Packet(const Endpoint &endpoint, const uint8_t *buffer, size_t length) // NOLINT
+        : endpoint(endpoint), buffer(buffer), length(length) {}
 
-    Packet(Packet &&) = delete;
-
-    Packet &operator=(const Packet &) = delete;
-
-    Packet &operator=(Packet &&) = delete;
-
-    explicit Packet(const Address &address, const uint8_t* buffer, size_t length) // NOLINT
-        : address(address), buffer(buffer) {}
-
-
-    [[nodiscard]] size_t bufferCapacity() const { return buffer.size(); }
-
-    Address address;
-    std::vector<uint8_t> buffer;
+    Endpoint endpoint;
+    const uint8_t *buffer;
+    size_t length;
 };
 }

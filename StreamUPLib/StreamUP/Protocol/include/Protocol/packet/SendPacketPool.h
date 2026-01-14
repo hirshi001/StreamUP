@@ -7,8 +7,10 @@
 
 namespace SUP
 {
+template<typename Address>
 class SendPacketPool
 {
+using SendPacket = SendPacket<Address>;
 public:
     SendPacketPool(SendPacketPool &) = delete;
 

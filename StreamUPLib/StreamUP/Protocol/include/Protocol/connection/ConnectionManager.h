@@ -6,8 +6,10 @@
 
 namespace SUP
 {
+template<typename Address>
 class ConnectionManager
 {
+    using Connection = Connection<Address>;
 public:
     ConnectionManager() = default;
 
@@ -38,7 +40,7 @@ public:
     }
 
 private:
-    std::map<Connection::ConnectionId, Connection *> connections;
+    std::map<typename Connection::ConnectionId, Connection *> connections;
     ConnectionIdHandler connectionIdHandler;
 };
 }

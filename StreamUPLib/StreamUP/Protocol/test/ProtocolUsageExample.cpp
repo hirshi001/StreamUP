@@ -11,7 +11,12 @@
 #include <asio.hpp>
 #include <boost/test/unit_test.hpp> // header-only version
 
-#include <sys/fcntl.h>
+using namespace SUP;
+using AddressT = asio::ip::udp::endpoint;
+using SendPacketT = SendPacket<AddressT>;
+using PacketT = Packet<AddressT>;
+using ProtocolT = Protocol<AddressT>;
+
 struct SocketData
 {
     SocketData() : socket(io_context) {}
@@ -21,7 +26,7 @@ struct SocketData
 };
 
 
-void sendPacketHandler(std::unique_ptr<SUP::SendPacket> packet)
+void sendPacketHandler(std::unique_ptr<SendPacketT> packet)
 {
     const auto &buffer = packet->data;
     const auto &address = packet->address;
@@ -38,37 +43,37 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
 {
     // Step 1. Create Protocol object with config
     using namespace SUP;
-    Protocol::Config config;
+    ProtocolT::Config config;
     config.allowInsecureConnections = true;
 
-    Protocol::Handlers handlers;
+    ProtocolT::Handlers handlers;
     handlers.sendPacketHandler = sendPacketHandler;
 
-    auto protocolCreationResult = Protocol::createProtocol(config, handlers);
+    auto protocolCreationResult = ProtocolT::createProtocol(config, handlers);
     if (!protocolCreationResult)
     {
         switch (protocolCreationResult.error())
         {
-            case Protocol::CreateProtocolError::FAILED_TO_CREATE_SSL_CTX:
+            case ProtocolT::CreateProtocolError::FAILED_TO_CREATE_SSL_CTX:
                 std::cout << "Failed to create SSL context" << std::endl;
                 break;
-            case Protocol::CreateProtocolError::MISSING_PRIVATE_KEY:
+            case ProtocolT::CreateProtocolError::MISSING_PRIVATE_KEY:
                 std::cout << "Missing private key" << std::endl;
                 break;
-            case Protocol::CreateProtocolError::MISSING_PUBLIC_KEY:
+            case ProtocolT::CreateProtocolError::MISSING_PUBLIC_KEY:
                 std::cout << "Missing public key" << std::endl;
                 break;
-            case Protocol::CreateProtocolError::MISSING_CIPHER_SUITES:
+            case ProtocolT::CreateProtocolError::MISSING_CIPHER_SUITES:
                 std::cout << "Missing cipher suites" << std::endl;
                 break;
-            case Protocol::CreateProtocolError::MISSING_EPHEMERAL_GROUPS:
+            case ProtocolT::CreateProtocolError::MISSING_EPHEMERAL_GROUPS:
                 std::cout << "Missing ephemeral groups" << std::endl;
                 break;
         }
         return;
     }
 
-    std::unique_ptr<Protocol> protocol = std::move(protocolCreationResult.value());
+    std::unique_ptr<Protocol<AddressT>> protocol = std::move(protocolCreationResult.value());
 
     // Step 2. Create socket which receives packets
     SocketData sockData;
@@ -79,6 +84,9 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
 
     asio::ip::udp::endpoint localEndpoint(asio::ip::udp::v6(), 12345);
     sockData.socket.bind(localEndpoint);
+
+    asio::ip::udp::endpoint other;
+
 
     // Step 3. Event Loop
     std::array<uint8_t, 2048> buf{};
@@ -112,10 +120,10 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
                     break; // no more packets
                 throw std::runtime_error("recvfrom failed");
             }
-            src.
-            auto packet = std::make_unique<SUP::Packet>();
-            protocol->getConnectionForPacket()
-            handle_packet(buf, n, src);
+
+            Packet packet(src, buf.data(), buf.size());
+            auto connection = protocol->getConnectionForPacket(packet);
+            connection->handlePacket(packet);
         }
 
 

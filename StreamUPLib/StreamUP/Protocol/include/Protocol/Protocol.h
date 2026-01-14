@@ -20,9 +20,9 @@
 
 namespace SUP
 {
-using SendPacketHandler = std::function<void(std::unique_ptr<SendPacket>)>;
-using NewConnectionHandler = std::function<void(Connection *)>;
-using ConnectionClosedHandler = std::function<void(Connection *)>;
+template<typename Addr>
+concept AddressLike =
+        std::equality_comparable<Addr>;
 
 using SSL_CTX_ptr = std::unique_ptr<SSL_CTX, decltype(&SSL_CTX_free)>;
 
@@ -53,8 +53,17 @@ enum class SUPVersions
 };
 
 
+template<typename Address> requires AddressLike<Address>
 class Protocol
 {
+    using Packet = Packet<Address>;
+    using SendPacket = SendPacket<Address>;
+    using Connection = Connection<Address>;
+    using Self = Protocol<Address>;
+
+    using SendPacketHandler = std::function<void(std::unique_ptr<SendPacket>)>;
+    using NewConnectionHandler = std::function<void(Connection *)>;
+    using ConnectionClosedHandler = std::function<void(Connection *)>;
     static constexpr int MAX_NUMBER_NEGOTIABLES = 16;
 
 public:
@@ -81,7 +90,7 @@ public:
         std::vector<Security::EphemeralKeyGroup> supportedEphemeralGroups;
         EVP_PKEY_ptr privateKey = nullptr;
         EVP_PKEY_ptr publicKey = nullptr;
-        bool allowInsecureConnections;
+        bool allowInsecureConnections{};
     };
 
     struct Handlers final
@@ -89,8 +98,8 @@ public:
         SendPacketHandler sendPacketHandler;
     };
 
-    static std::expected<std::unique_ptr<Protocol>, CreateProtocolError> createProtocol(
-        const Protocol::Config &config, const Protocol::Handlers &handlers)
+    static std::expected<std::unique_ptr<Self>, CreateProtocolError> createProtocol(
+        const Config &config, const Handlers &handlers)
     {
         if (!config.allowInsecureConnections)
         {
@@ -112,12 +121,13 @@ public:
         if (!ctx)
             return std::unexpected(CreateProtocolError::FAILED_TO_CREATE_SSL_CTX);
 
-        return std::unique_ptr<Protocol>(new Protocol(std::move(ctx), config.cipherSuites,
+        return std::unique_ptr<Self>(new Self(std::move(ctx), config.cipherSuites,
                                                       config.supportedEphemeralGroups, config.privateKey,
-                                                      config.publicKey, false, handlers));
+                                                      config.publicKey, config.allowInsecureConnections, handlers));
     }
 
 private:
+
     explicit Protocol(SSL_CTX_ptr ctx,
                       const std::vector<Security::CipherSuite> &cipherSuitesAvailable,
                       const std::vector<Security::EphemeralKeyGroup> &supportedEphemeralGroups,
@@ -158,10 +168,10 @@ public:
      * Returns the corresponding connection for the packet
      * @param packet
      */
-    Connection *getConnectionForPacket(const std::unique_ptr<Packet> &packet)
+    Connection *getConnectionForPacket(const Packet &packet)
     {
-        BufferUtil::ReadBufferWrapper reader(packet->buffer.data(), packet->buffer.size());
-        Connection::ConnectionId connectionId;
+        BufferUtil::ReadBufferWrapper reader(packet.buffer, packet.length);
+        typename Connection::ConnectionId connectionId;
         for (int i = 0; i < Connection::CONNECTION_ID_SIZE; i++) { connectionId[i] = reader.read<uint8_t>(); }
 
         // TODO: Make sure multiple connection ids per packet are handled properly
@@ -178,10 +188,7 @@ public:
      */
     Connection *createNewConnection() { return connectionManager.addNewConnection(); }
 
-    void advance_time(std::chrono::milliseconds delta)
-    {
-
-    }
+    void advance_time(std::chrono::milliseconds delta) {}
 
 
     void acceptClientHandshake(const Address &address, uint8_t *data, int length)
@@ -301,9 +308,9 @@ private:
     std::vector<Security::CipherSuite> cipherSuitesAvailable;
     std::vector<Security::EphemeralKeyGroup> supportedEphemeralGroups;
     bool allowInsecureConnections;
-    SendPacketPool sendPacketPool;
 
-    ConnectionManager connectionManager;
+    SendPacketPool<Address> sendPacketPool;
+    ConnectionManager<Address> connectionManager;
     Handlers handlers;
 };
 }
