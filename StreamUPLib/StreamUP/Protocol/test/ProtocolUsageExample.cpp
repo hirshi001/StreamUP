@@ -26,28 +26,43 @@ struct SocketData
 };
 
 
-void sendPacketHandler(std::unique_ptr<SendPacketT> packet)
+void sendPacketHandler(std::shared_ptr<SocketData> sockData, std::unique_ptr<SendPacketT> packet)
 {
     const auto &buffer = packet->data;
-    const auto &address = packet->address;
-
-    auto dst = resolve_address(address.getAddress(), std::to_string(address.getPort()));
-    ssize_t bytesSent = sendto(sock, buffer.data, buffer.getWriteIndex(), 0,
-                               reinterpret_cast<sockaddr *>(&dst.addr),
-                               dst.addrlen);
-    if (bytesSent == -1) { std::cerr << "Failed to send packet: " << strerror(errno) << std::endl; }
+    const auto &dst = packet->address;
+    try
+    {
+        size_t bytesSent = sockData->socket.send_to(asio::const_buffer(buffer.data, buffer.getWriteIndex()), dst);
+        assert(bytesSent == buffer.getWriteIndex());
+    }catch (const asio::system_error& e)
+    {
+        std::cerr << "Failed to send packet: " << e.what() << std::endl;
+    }
 }
 
 
 BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
 {
-    // Step 1. Create Protocol object with config
+    // Step 1. Create and bind the socket
+    std::shared_ptr<SocketData> sockData;
+    sockData->socket.open(asio::ip::udp::v6());
+
+    asio::ip::v6_only dualStack(false);
+    sockData->socket.set_option(dualStack);
+
+    asio::ip::udp::endpoint localEndpoint(asio::ip::udp::v6(), 12345);
+    sockData->socket.bind(localEndpoint);
+
+    // Step 2. Create Protocol object with config
     using namespace SUP;
     ProtocolT::Config config;
     config.allowInsecureConnections = true;
 
     ProtocolT::Handlers handlers;
-    handlers.sendPacketHandler = sendPacketHandler;
+    handlers.sendPacketHandler = [sockData](std::unique_ptr<SendPacketT> packet)
+    {
+        sendPacketHandler(sockData, std::move(packet));
+    };
 
     auto protocolCreationResult = ProtocolT::createProtocol(config, handlers);
     if (!protocolCreationResult)
@@ -73,19 +88,9 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
         return;
     }
 
-    std::unique_ptr<Protocol<AddressT>> protocol = std::move(protocolCreationResult.value());
+    std::unique_ptr<Protocol<AddressT> > protocol = std::move(protocolCreationResult.value());
 
     // Step 2. Create socket which receives packets
-    SocketData sockData;
-    sockData.socket.open(asio::ip::udp::v6());
-
-    asio::ip::v6_only dualStack(false);
-    sockData.socket.set_option(dualStack);
-
-    asio::ip::udp::endpoint localEndpoint(asio::ip::udp::v6(), 12345);
-    sockData.socket.bind(localEndpoint);
-
-    asio::ip::udp::endpoint other;
 
 
     // Step 3. Event Loop
@@ -112,7 +117,7 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
         size_t n;
         while (true)
         {
-            n = sockData.socket.receive_from(asio::buffer(buf.data(), buf.size()), src);
+            n = sockData->socket.receive_from(asio::buffer(buf.data(), buf.size()), src);
 
             if (n < 0)
             {
@@ -127,10 +132,7 @@ BOOST_AUTO_TEST_CASE(ProtocolUsageExample)
         }
 
 
-
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-
-    protocol->getConnectionForPacket();
 }
