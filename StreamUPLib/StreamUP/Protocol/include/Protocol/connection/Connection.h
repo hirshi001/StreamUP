@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Protocol/packet/Packet.h"
 #include "Protocol/stream/Stream.h"
 
 #include <map>
@@ -22,12 +23,17 @@ class Connection
 public:
     static constexpr int CONNECTION_ID_SIZE = 12;
     using ConnectionId = std::array<uint8_t, CONNECTION_ID_SIZE>;
-    static_assert(ByteArray<Connection::ConnectionId>);
+    static_assert(ByteArray<ConnectionId>);
 
     using StreamId = uint32_t; // TODO: Make StreamId VarInt
     std::vector<ConnectionId> connectionIds;
     std::map<StreamId, Stream> streams;
     Address remoteEndpoint;
+
+    void handlePacket(const Packet<Address> &packet)
+    {
+
+    }
 
     void addConnectionId(ConnectionId connectionId)
     {
